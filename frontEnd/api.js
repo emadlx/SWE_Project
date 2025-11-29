@@ -1,8 +1,7 @@
+// API Configuration
 const API_CONFIG = {
-    BASE_URL: "http://localhost:8000/api", // change it to backend link
-    DEMO_MODE: true, 
+    BASE_URL: "http://localhost:8000/api", // change it to api
     ENDPOINTS: {
-
         // Authentication 
         LOGIN: '/auth/login',
         SIGNUP: '/auth/signup',
@@ -14,19 +13,20 @@ const API_CONFIG = {
         // History
         GET_HISTORY: '/history',
         GET_ITEM: '/history/:id',
+        DELETE_ITEM: '/history/:id'
     } 
 };
 
-// API Helper Functions 
+//  Helper Functions 
 const api = {
-    // make request function 
+    // Make request function 
     async request(endpoint, options = {}) {
         const token = localStorage.getItem('authToken');
 
         const config = {
             headers: {
                 'Content-Type': 'application/json',
-                ...API_CONFIG(token && {'Authorization': `Bearer ${token}`}),
+                ...(token && {'Authorization': `Bearer ${token}`}),
                 ...options.headers
             },
             ...options
@@ -35,44 +35,44 @@ const api = {
         try {
             const response = await fetch(`${API_CONFIG.BASE_URL}${endpoint}`, config);
 
-            if(!response.ok){
+            if (!response.ok) {
                 const error = await response.json();
-                throw new Error(error.message || "Something went wrong");
+                throw new Error(error.message || 'Something went wrong');
             }
 
             return await response.json();
-        }
-        catch(error){
-            console.error('API Error', error);
+        } catch (error) {
+            console.error('API Error:', error);
             throw error;
         }
     },
 
-
-    // Authentication APIs 
+    // Authentication  
     async login(email, password) {
         const data = await this.request(API_CONFIG.ENDPOINTS.LOGIN, {
-                method: 'POST',
-                body: JSON.stringify({email, password})
+            method: 'POST',
+            body: JSON.stringify({email, password})
         });
 
-        if(data.token) {
+        if (data.token) {
             localStorage.setItem('authToken', data.token);
             localStorage.setItem('user', JSON.stringify(data.user));
         }
+        
         return data;
     },
 
-    async signup(fullname, email, password) {
+    async signup(fullName, email, password) {
         const data = await this.request(API_CONFIG.ENDPOINTS.SIGNUP, {
             method: 'POST',
-            body: JSON.stringify({fullname, email, password})
+            body: JSON.stringify({fullName, email, password})
         });
 
-        if(data.token) {
+        if (data.token) {
             localStorage.setItem('authToken', data.token);
             localStorage.setItem('user', JSON.stringify(data.user));
         }
+        
         return data;
     },
 
@@ -81,27 +81,26 @@ const api = {
             await this.request(API_CONFIG.ENDPOINTS.LOGOUT, {
                 method: 'POST'
             });
+        } catch (error) {
+            console.error('Logout Error:', error);
         }
-        catch (error){
-            console.error('Logout Error: ', error);
-        }
+        
         localStorage.removeItem('authToken');
         localStorage.removeItem('user');
     },
 
     // Analysis APIs
-    async analysisContent(text, type='text') {
+    async analyzeContent(text, type = 'text') {
         return await this.request(API_CONFIG.ENDPOINTS.ANALYZE, {
             method: 'POST',
             body: JSON.stringify({
                 content: text,
-                type: type
+                type: type 
             })
         });
     },
 
-
-    // History
+    // History 
     async getHistory() {
         return await this.request(API_CONFIG.ENDPOINTS.GET_HISTORY, {
             method: 'GET'
@@ -115,17 +114,25 @@ const api = {
         });
     },
 
-    //Check Authentication
+    async deleteHistoryItem(id) {
+        const endpoint = API_CONFIG.ENDPOINTS.DELETE_ITEM.replace(':id', id);
+        return await this.request(endpoint, {
+            method: 'DELETE'
+        });
+    },
+
+    // Check  authenticated
     isAuthenticated() {
         return !!localStorage.getItem('authToken');
     },
 
-    // Get Current user 
+    // Get current user 
     getCurrentUser() {
         const user = localStorage.getItem('user');
-        return user? JSON.parse(user) : null;
+        return user ? JSON.parse(user) : null;
     }
 };
+
 
 window.api = api;
 window.API_CONFIG = API_CONFIG;
