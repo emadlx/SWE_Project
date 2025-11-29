@@ -63,5 +63,69 @@ const api = {
         return data;
     },
 
-    
-}
+    async signup(fullname, email, password) {
+        const data = await this.request(API_CONFIG.ENDPOINTS.SIGNUP, {
+            method: 'POST',
+            body: JSON.stringify({fullname, email, password})
+        });
+
+        if(data.token) {
+            localStorage.setItem('authToken', data.token);
+            localStorage.setItem('user', JSON.stringify(data.user));
+        }
+        return data;
+    },
+
+    async logout() {
+        try {
+            await this.request(API_CONFIG.ENDPOINTS.LOGOUT, {
+                method: 'POST'
+            });
+        }
+        catch (error){
+            console.error('Logout Error: ', error);
+        }
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('user');
+    },
+
+    // Analysis APIs
+    async analysisContent(text, type='text') {
+        return await this.request(API_CONFIG.ENDPOINTS.ANALYZE, {
+            method: 'POST',
+            body: JSON.stringify({
+                content: text,
+                type: type
+            })
+        });
+    },
+
+
+    // History
+    async getHistory() {
+        return await this.request(API_CONFIG.ENDPOINTS.GET_HISTORY, {
+            method: 'GET'
+        });
+    },
+
+    async getHistoryItem(id) {
+        const endpoint = API_CONFIG.ENDPOINTS.GET_ITEM.replace(':id', id);
+        return await this.request(endpoint, {
+            method: 'GET'
+        });
+    },
+
+    //Check Authentication
+    isAuthenticated() {
+        return !!localStorage.getItem('authToken');
+    },
+
+    // Get Current user 
+    getCurrentUser() {
+        const user = localStorage.getItem('user');
+        return user? JSON.parse(user) : null;
+    }
+};
+
+window.api = api;
+window.API_CONFIG = API_CONFIG;
