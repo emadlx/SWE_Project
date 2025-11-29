@@ -177,7 +177,7 @@ function App() {
     
     return (
         <div className="flex h-screen bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100">
-            {/* Mobile Menu Button */}
+            {/* Menu Button */}
             <button 
                 className={`fixed top-4 left-4 z-50 lg:hidden w-10 h-10 bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-800 rounded-lg flex flex-col items-center justify-center gap-1 transition-all ${isSidebarOpen ? 'bg-slate-200 dark:bg-slate-800' : ''}`}
                 onClick={() => setIsSidebarOpen(!isSidebarOpen)} >
